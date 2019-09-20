@@ -27,14 +27,21 @@ namespace Agent.Components
 
         static VisualField()
         {
-            var starImageUri = new Uri("pack://application:,,/Images/star.png");
-            _starImage = new BitmapImage(starImageUri);
+            try
+            {
+                var starImageUri = new Uri("pack://application:,,/Images/star.png");
+                _starImage = new BitmapImage(starImageUri);
 
-            var cookieImageUri = new Uri("pack://application:,,/Images/cookie.png");
-            _cookieImage = new BitmapImage(cookieImageUri);
+                var cookieImageUri = new Uri("pack://application:,,/Images/cookie.png");
+                _cookieImage = new BitmapImage(cookieImageUri);
 
-            var heroImageUri = new Uri("pack://application:,,/Images/hero.png");
-            _heroImage = new BitmapImage(heroImageUri);
+                var heroImageUri = new Uri("pack://application:,,/Images/hero.png");
+                _heroImage = new BitmapImage(heroImageUri);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
         }
 
         public VisualField()

@@ -52,7 +52,7 @@ namespace Agent.Models
             
             int randomX = r.Next(Width);
             int randomY = r.Next(Height);
-            if (FieldNodes[randomX, randomY] != NodeType.Rock)
+            if (FieldNodes[randomX, randomY] == NodeType.Gross)
             {
                 FieldNodes[randomX, randomY] = objectType;
                 PutObjectsOnSomeNodes(objectType, objectsLeft - 1);

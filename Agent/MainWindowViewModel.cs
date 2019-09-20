@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Agent.Annotations;
 using Agent.Models;
 
@@ -15,16 +16,8 @@ namespace Agent
     {
         public MainWindowViewModel()
         {
-            ActionField = new ActionField(8, 8);
-
-            Task.Run(() =>
-            {
-                for (int i = 0; i < 60; i++)
-                {
-                    Time += TimeSpan.FromSeconds(1);
-                    Thread.Sleep(1000);
-                }
-            });
+            ActionFieldHeight = 3;
+            ActionFieldWidth = 3;
         }
 
         private ActionField _actionField;
@@ -34,29 +27,81 @@ namespace Agent
             get { return _actionField; }
             set
             {
-                OnPropertyChanged();
                 _actionField = value;
+                OnPropertyChanged();
             }
         }
 
-        private DateTime _time;
+        private int _actionFieldHeight;
+        private int _actionFieldWidth;
 
-        public DateTime Time
+        public int ActionFieldHeight
         {
             set
             {
+                _actionFieldHeight = value;
                 OnPropertyChanged();
-                _time = value;
             }
-            get { return _time; }
+            get { return _actionFieldHeight; }
+        }
+
+        public int ActionFieldWidth
+        {
+            set
+            {
+                _actionFieldWidth = value;
+                OnPropertyChanged();
+            }
+            get { return _actionFieldWidth; }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private RelayCommand generateCommand;
+
+        public RelayCommand GenerateCommand
+        {
+            get
+            {
+                return generateCommand ?? (generateCommand = new RelayCommand(obj =>
+                {
+                    ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth);
+                }));
+            }
+        }
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class RelayCommand : ICommand
+    {
+        private Action<object> execute;
+        private Func<object, bool> canExecute;
+
+        public event EventHandler CanExecuteChanged
+        {
+            add { CommandManager.RequerySuggested += value; }
+            remove { CommandManager.RequerySuggested -= value; }
+        }
+
+        public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+        {
+            this.execute = execute;
+            this.canExecute = canExecute;
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            return this.canExecute == null || this.canExecute(parameter);
+        }
+
+        public void Execute(object parameter)
+        {
+            this.execute(parameter);
         }
     }
 }
