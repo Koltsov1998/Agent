@@ -2,8 +2,14 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Composition;
 using System.Windows.Media.Imaging;
+using Agent.Algorythms;
+using Agent.GraphCreators;
+using Agent.Graphs;
 using Agent.Models;
+using SPoint = System.Windows.Point;
+using Point = Agent.Others.Point;
 
 namespace Agent.Components
 {
@@ -12,36 +18,29 @@ namespace Agent.Components
     /// </summary>
     public partial class VisualField : UserControl
     {
-        public static readonly DependencyProperty ActionFieldProperty =
-            DependencyProperty.Register("ActionField", typeof(ActionField), typeof(VisualField), new UIPropertyMetadata(
-                OnActionFieldChanged));
+
+        public static readonly DependencyProperty ActionFieldProperty = DependencyProperty.Register("ActionField",
+            typeof(ActionField), typeof(VisualField), new UIPropertyMetadata(
+                OnContextChanged));
 
         public ActionField ActionField
         {
             set { SetValue(ActionFieldProperty, value); }
-
-            get { return (ActionField) GetValue(ActionFieldProperty); }
+            get { return (ActionField)GetValue(ActionFieldProperty); }
         }
 
         private static DrawingVisualElement _drawingVisualElement;
 
         static VisualField()
         {
-            try
-            {
-                var starImageUri = new Uri("pack://application:,,/Images/star.png");
-                _starImage = new BitmapImage(starImageUri);
+            var starImageUri = new Uri("pack://application:,,/UI/Images/star.png");
+            _starImage = new BitmapImage(starImageUri);
 
-                var cookieImageUri = new Uri("pack://application:,,/Images/cookie.png");
-                _cookieImage = new BitmapImage(cookieImageUri);
+            var cookieImageUri = new Uri("pack://application:,,/UI/Images/cookie.png");
+            _cookieImage = new BitmapImage(cookieImageUri);
 
-                var heroImageUri = new Uri("pack://application:,,/Images/hero.png");
-                _heroImage = new BitmapImage(heroImageUri);
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-            }
+            var heroImageUri = new Uri("pack://application:,,/UI/Images/hero.png");
+            _heroImage = new BitmapImage(heroImageUri);
         }
 
         public VisualField()
@@ -54,10 +53,8 @@ namespace Agent.Components
             _stackPanel = StackPanel;
         }
 
-        public static void RenderActionField(ActionField field)
+        public static void RenderActionField(ActionField field, DrawingContext drawingContext)
         {
-            var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
-
             int fieldWidth = field.Width * (_nodeWidth + _bordersWidth) + _bordersWidth;
             int fieldHeight = field.Height * (_nodeWidth + _bordersWidth) + _bordersWidth;
 
@@ -114,8 +111,6 @@ namespace Agent.Components
                     }
                 }
             }
-
-            drawingContext.Close();
         }
 
         private static void DrawObject(ImageSource objectImage, DrawingContext drawingContext, int i, int j)
@@ -130,10 +125,49 @@ namespace Agent.Components
                     _objectSize, _objectSize));
         }
 
-        private static void OnActionFieldChanged(DependencyObject e, DependencyPropertyChangedEventArgs args)
+        private static void RenderGraphMesh(GraphNode graph, DrawingContext drawingContext)
+        {
+            IterateOnGraph(graph, (context, point, arg3) => DrawArrow(context, point, arg3));
+
+            void IterateOnGraph(GraphNode g, Action<DrawingContext, Point, Point> callback)
+            {
+                foreach (var childNode in g.ChildNodes)
+                {
+                    callback(drawingContext, g.Point, childNode.Point);
+                    IterateOnGraph(childNode, callback);
+                }
+            }
+        }
+
+        private static void DrawArrow(DrawingContext context, Point point1, Point point2)
+        {
+            var pen = new Pen(Brushes.Red, 1 * _scale);
+            var startPoint = ConvertPoint(point1);
+            var endPoint = ConvertPoint(point2);
+            context.DrawLine(pen, startPoint, endPoint);
+        }
+
+        private static SPoint ConvertPoint(Point point)
+        {
+            return new SPoint(
+                scaleCoordinate(point.X),
+                scaleCoordinate(point.Y)
+            );
+
+            double scaleCoordinate(int coordinate)
+            {
+                return (coordinate + 0.5) * (_nodeWidth + _bordersWidth) + _bordersWidth;
+            }
+        }
+
+        private static void OnContextChanged(DependencyObject e, DependencyPropertyChangedEventArgs args)
         {
             var field = args.NewValue as ActionField;
-            RenderActionField(field);
+            var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
+            RenderActionField(field, drawingContext);
+            var graphCreator = new DfsGraphCreator();
+            RenderGraphMesh(graphCreator.GenerateGraph(field), drawingContext);
+            drawingContext.Close();
         }
 
         private static StackPanel _stackPanel;
@@ -155,7 +189,11 @@ namespace Agent.Components
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             _scale = e.NewValue / 5 + 1;
-            RenderActionField(ActionField);
+            var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
+            RenderActionField(ActionField, drawingContext);
+            var graphCreator = new DfsGraphCreator();
+            RenderGraphMesh(graphCreator.GenerateGraph(ActionField), drawingContext);
+            drawingContext.Close();
         }
     }
 }

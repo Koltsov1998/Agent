@@ -8,12 +8,13 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Agent</RootNamespace>
     <AssemblyName>Agent</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,6 +38,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -56,7 +58,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Components\VisualField\VisualField.xaml">
+    <Page Include="UI\Components\VisualField\VisualField.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -64,15 +66,22 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Graphs\Algorythms\BfsAlgorythm.cs" />
+    <Compile Include="Graphs\Algorythms\IAlgorythm.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Components\VisualField\DrawingVisualElement.cs" />
-    <Compile Include="Components\VisualField\VisualField.xaml.cs">
+    <Compile Include="Graphs\GraphCreators\BfsGraphCreator.cs" />
+    <Compile Include="Graphs\GraphNode.cs" />
+    <Compile Include="Others\Point.cs" />
+    <Compile Include="UI\Components\VisualField\DrawingVisualElement.cs" />
+    <Compile Include="UI\Components\VisualField\VisualField.xaml.cs">
       <DependentUpon>VisualField.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Components\VisualField\VisualFieldViewModel.cs" />
+    <Compile Include="UI\Components\VisualField\VisualFieldViewModel.cs" />
+    <Compile Include="Graphs\GraphCreators\DfsGraphCreator.cs" />
+    <Compile Include="Graphs\GraphCreators\IGraphCreator.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -109,19 +118,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\star.png">
+    <Resource Include="UI\Images\cookie.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\cookie.png">
+    <Resource Include="UI\Images\hero.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\hero.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="UI\Images\star.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Agent.Algorythms;
 using Agent.Annotations;
 using Agent.Models;
 
@@ -34,7 +35,7 @@ namespace Agent
 
         private int _actionFieldHeight;
         private int _actionFieldWidth;
-
+        private int _cookiesCount;
         public int ActionFieldHeight
         {
             set
@@ -55,6 +56,16 @@ namespace Agent
             get { return _actionFieldWidth; }
         }
 
+        public int CookiesCount
+        {
+            set
+            {
+                _cookiesCount = value;
+                OnPropertyChanged();
+            }
+            get { return _cookiesCount; }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private RelayCommand generateCommand;
@@ -65,7 +76,7 @@ namespace Agent
             {
                 return generateCommand ?? (generateCommand = new RelayCommand(obj =>
                 {
-                    ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth);
+                    ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth, CookiesCount);
                 }));
             }
         }

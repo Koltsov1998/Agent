@@ -1,20 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Agent.Models
 {
     public class ActionField
     {
-        public ActionField(int height, int width)
+        public ActionField(int height, int width, int cookiesCount)
         {
             Height = height;
             Width = width;
             FieldNodes = new NodeType[height, width];
 
-            InitializeFieldRandomly();
+            InitializeFieldRandomly(cookiesCount);
         }
 
         public int Height { get; private set; }
@@ -23,7 +25,7 @@ namespace Agent.Models
 
         public NodeType[,] FieldNodes { get; private set; }
 
-        private void InitializeFieldRandomly()
+        private void InitializeFieldRandomly(int cookiesCount = 3)
         {
             var random = new Random();
 
@@ -37,7 +39,7 @@ namespace Agent.Models
             }
 
             PutObjectsOnSomeNodes(NodeType.Star, 1);
-            PutObjectsOnSomeNodes(NodeType.Cookie, 3);
+            PutObjectsOnSomeNodes(NodeType.Cookie, cookiesCount);
             PutObjectsOnSomeNodes(NodeType.Agent, 1);
         }
 
