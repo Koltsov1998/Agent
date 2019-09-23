@@ -32,6 +32,16 @@ namespace Agent.Graphs.GraphCreators
             return sourceNode;
         }
 
+        public GraphNode GenerateGraph(ActionField actionField, Point startPoint)
+        {
+            var visited = new bool[actionField.Width, actionField.Height];
+            visited[startPoint.X, startPoint.Y] = true;
+
+            GraphNode sourceNode = new GraphNode(startPoint, null, actionField.FieldNodes.Get(startPoint));
+            StartAppendingNodes(sourceNode, visited, actionField);
+            return sourceNode;
+        }
+
         private void StartAppendingNodes(GraphNode node, bool[,] visited, ActionField field)
         {
             Queue<GraphNode> q = new Queue<GraphNode>();
