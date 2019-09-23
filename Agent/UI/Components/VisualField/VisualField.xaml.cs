@@ -7,6 +7,7 @@ using System.Windows.Media.Imaging;
 using Agent.Algorythms;
 using Agent.GraphCreators;
 using Agent.Graphs;
+using Agent.Graphs.GraphCreators;
 using Agent.Models;
 using SPoint = System.Windows.Point;
 using Point = Agent.Others.Point;
@@ -165,8 +166,7 @@ namespace Agent.Components
             var field = args.NewValue as ActionField;
             var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
             RenderActionField(field, drawingContext);
-            var graphCreator = new DfsGraphCreator();
-            RenderGraphMesh(graphCreator.GenerateGraph(field), drawingContext);
+            RenderGraphMesh(CreateGraph(field), drawingContext);
             drawingContext.Close();
         }
 
@@ -191,9 +191,16 @@ namespace Agent.Components
             _scale = e.NewValue / 5 + 1;
             var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
             RenderActionField(ActionField, drawingContext);
-            var graphCreator = new DfsGraphCreator();
-            RenderGraphMesh(graphCreator.GenerateGraph(ActionField), drawingContext);
+            RenderGraphMesh(CreateGraph(ActionField), drawingContext);
             drawingContext.Close();
+        }
+
+        private static GraphNode CreateGraph(ActionField af)
+        {
+             var graphCreator = new DfsGraphCreator();
+            // var graphCreator = new BfsGraphCreator();
+            var graph = graphCreator.GenerateGraph(af);
+            return graph;
         }
     }
 }

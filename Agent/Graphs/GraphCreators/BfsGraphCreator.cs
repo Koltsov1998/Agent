@@ -28,51 +28,56 @@ namespace Agent.Graphs.GraphCreators
             visited[sourcePoint.X, sourcePoint.Y] = true;
 
             GraphNode sourceNode = new GraphNode(sourcePoint, null, NodeType.Agent);
-            AppendNextNode(sourceNode, visited, actionField);
+            StartAppendingNodes(sourceNode, visited, actionField);
             return sourceNode;
         }
 
-        private void StartAppendingNodes(GraphNode node, bool[,] visited, ActionField field, Queue<Point> q)
+        private void StartAppendingNodes(GraphNode node, bool[,] visited, ActionField field)
         {
-            
-            node.ChildNodes = new List<GraphNode>();
+            Queue<GraphNode> q = new Queue<GraphNode>();
+            q.Enqueue(node);
 
             while (q.Count > 0)
             {
-                Point currentPoint = node.Point;
+                GraphNode currentNode = q.Dequeue();
+                currentNode.ChildNodes = new List<GraphNode>();
+                Point currentPoint = currentNode.Point;
 
                 // right
                 var rightPoint = new Point(currentPoint.X + 1, currentPoint.Y);
                 if (currentPoint.X + 1 < visited.GetLength(0) && !visited.Get(rightPoint) && field.FieldNodes.Get(rightPoint) != NodeType.Rock)
                 {
                     var rightNode = new GraphNode(rightPoint, node, field.FieldNodes[currentPoint.X + 1, currentPoint.Y]);
-                    node.ChildNodes.Add(rightNode);
+                    currentNode.ChildNodes.Add(rightNode);
                     visited[currentPoint.X + 1, currentPoint.Y] = true;
-                    q.Enqueue(rightPoint);
+                    q.Enqueue(rightNode);
                 }
                 // up
                 var upPoint = new Point(currentPoint.X, currentPoint.Y - 1);
                 if (currentPoint.Y > 0 && !visited.Get(upPoint) && field.FieldNodes.Get(upPoint) != NodeType.Rock)
                 {
                     var upNode = new GraphNode(upPoint, node, field.FieldNodes.Get(upPoint));
-                    node.ChildNodes.Add(upNode);
+                    currentNode.ChildNodes.Add(upNode);
                     visited[currentPoint.X, currentPoint.Y - 1] = true;
-                    q.Enqueue(upPoint);
+                    q.Enqueue(upNode);
                 }
                 // left
                 var leftPoint = new Point(currentPoint.X - 1, currentPoint.Y);
                 if (currentPoint.X > 0 && !visited.Get(leftPoint) && field.FieldNodes.Get(leftPoint) != NodeType.Rock)
                 {
                     var rightNode = new GraphNode(leftPoint, node, field.FieldNodes.Get(leftPoint));
-                    node.ChildNodes.Add(rightNode);
-                    AppendNextNode(rightNode, visited, field);
+                    currentNode.ChildNodes.Add(rightNode);
+                    visited[currentPoint.X - 1, currentPoint.Y] = true;
+                    q.Enqueue(rightNode);
                 }
                 // down
-                if (currentPoint.Y + 1 < visited.GetLength(1) && !visited[currentPoint.X, currentPoint.Y + 1] && field.FieldNodes[currentPoint.X, currentPoint.Y + 1] != NodeType.Rock)
+                var downPoint = new Point(currentPoint.X, currentPoint.Y + 1);
+                if (currentPoint.Y + 1 < visited.GetLength(1) && !visited.Get(downPoint) && field.FieldNodes.Get(downPoint) != NodeType.Rock)
                 {
-                    var rightNode = new GraphNode(new Point(currentPoint.X, currentPoint.Y + 1), node, field.FieldNodes[currentPoint.X, currentPoint.Y + 1]);
-                    node.ChildNodes.Add(rightNode);
-                    AppendNextNode(rightNode, visited, field);
+                    var downNode = new GraphNode(new Point(currentPoint.X, currentPoint.Y + 1), node, field.FieldNodes[currentPoint.X, currentPoint.Y + 1]);
+                    currentNode.ChildNodes.Add(downNode);
+                    visited[currentPoint.X, currentPoint.Y + 1] = true;
+                    q.Enqueue(downNode);
                 }
             }
         }
