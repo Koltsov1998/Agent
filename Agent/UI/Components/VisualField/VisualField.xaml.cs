@@ -68,30 +68,31 @@ namespace Agent.Components
             for (int i = 0; i < field.Height; i++)
             for (int j = 0; j < field.Width; j++)
             {
+                var backGroundRectangle = new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
+                    _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth);
+
                 switch (field.FieldNodes[i, j])
                 {
                     case NodeType.Gross:
                     {
                         drawingContext.DrawRectangle(Brushes.ForestGreen,
                             (Pen) null,
-                            new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
-                                _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth));
+                            backGroundRectangle);
                     }
                         break;
                     case NodeType.Rock:
                     {
                         drawingContext.DrawRectangle(Brushes.DarkSlateGray,
                             (Pen) null,
-                            new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
-                                _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth));
+                            backGroundRectangle
+                            );
                     }
                         break;
                     case NodeType.Star:
                     {
                         drawingContext.DrawRectangle(Brushes.ForestGreen,
                             (Pen) null,
-                            new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
-                                _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth));
+                            backGroundRectangle);
                         drawingContext.DrawImage(_starImage,
                             new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
                                 _bordersWidth + j * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
