@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -9,6 +12,7 @@ using Agent.GraphCreators;
 using Agent.Graphs;
 using Agent.Graphs.GraphCreators;
 using Agent.Models;
+using Agent.Solutions;
 using SPoint = System.Windows.Point;
 using Point = Agent.Others.Point;
 
@@ -27,7 +31,7 @@ namespace Agent.Components
         public ActionField ActionField
         {
             set { SetValue(ActionFieldProperty, value); }
-            get { return (ActionField)GetValue(ActionFieldProperty); }
+            get { return (ActionField) GetValue(ActionFieldProperty); }
         }
 
         private static DrawingVisualElement _drawingVisualElement;
@@ -85,7 +89,7 @@ namespace Agent.Components
                         drawingContext.DrawRectangle(Brushes.DarkSlateGray,
                             (Pen) null,
                             backGroundRectangle
-                            );
+                        );
                     }
                         break;
                     case NodeType.Star:
@@ -129,7 +133,7 @@ namespace Agent.Components
 
         private static void RenderGraphMesh(GraphNode graph, DrawingContext drawingContext)
         {
-            IterateOnGraph(graph, (context, point, arg3) => DrawArrow(context, point, arg3));
+            IterateOnGraph(graph, (context, point, arg3) => DrawArrow(context, point, arg3, Brushes.Red));
 
             void IterateOnGraph(GraphNode g, Action<DrawingContext, Point, Point> callback)
             {
@@ -141,9 +145,19 @@ namespace Agent.Components
             }
         }
 
-        private static void DrawArrow(DrawingContext context, Point point1, Point point2)
+        private static void RenderSolutionRoute(List<GraphNode> solutionRoute, DrawingContext drawindContext)
         {
-            var pen = new Pen(Brushes.Red, 1 * _scale);
+            var previousNode = solutionRoute[0];
+            for (int i = 1; i < solutionRoute.Count; i++)
+            {
+                DrawArrow(drawindContext, previousNode.Point, solutionRoute[i].Point, Brushes.Purple);
+                previousNode = solutionRoute[i];
+            }
+        }
+
+        private static void DrawArrow(DrawingContext context, Point point1, Point point2, SolidColorBrush color)
+        {
+            var pen = new Pen(color, 1 * _scale);
             var startPoint = ConvertPoint(point1);
             var endPoint = ConvertPoint(point2);
             context.DrawLine(pen, startPoint, endPoint);
@@ -165,10 +179,7 @@ namespace Agent.Components
         private static void OnContextChanged(DependencyObject e, DependencyPropertyChangedEventArgs args)
         {
             var field = args.NewValue as ActionField;
-            var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
-            RenderActionField(field, drawingContext);
-            RenderGraphMesh(CreateGraph(field), drawingContext);
-            drawingContext.Close();
+            RerenderAll(field);
         }
 
         private static StackPanel _stackPanel;
@@ -190,18 +201,31 @@ namespace Agent.Components
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             _scale = e.NewValue / 5 + 1;
+            RerenderAll(ActionField);
+        }
+
+        private static void RerenderAll(ActionField af)
+        {
             var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
-            RenderActionField(ActionField, drawingContext);
-            RenderGraphMesh(CreateGraph(ActionField), drawingContext);
+            RenderActionField(af, drawingContext);
+            RenderGraphMesh(CreateGraph(af), drawingContext);
+            RenderSolutionRoute(CreateSolutionRoute(af), drawingContext);
             drawingContext.Close();
         }
 
         private static GraphNode CreateGraph(ActionField af)
         {
-             var graphCreator = new DfsGraphCreator();
-            // var graphCreator = new BfsGraphCreator();
+            //var graphCreator = new DfsGraphCreator();
+            var graphCreator = new BfsGraphCreator();
             var graph = graphCreator.GenerateGraph(af);
             return graph;
+
+        }
+
+        private static List<GraphNode> CreateSolutionRoute(ActionField af)
+        {
+            BfsSolver solver = new BfsSolver();
+            return solver.Solve(af);
         }
     }
 }

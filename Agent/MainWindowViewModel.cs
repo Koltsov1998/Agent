@@ -17,8 +17,9 @@ namespace Agent
     {
         public MainWindowViewModel()
         {
-            ActionFieldHeight = 3;
-            ActionFieldWidth = 3;
+            ActionFieldHeight = 4;
+            ActionFieldWidth = 4;
+            CookiesCount = 3;
         }
 
         private ActionField _actionField;
