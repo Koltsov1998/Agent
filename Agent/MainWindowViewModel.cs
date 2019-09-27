@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Agent.Algorythms;
 using Agent.Annotations;
+using Agent.Graphs.GraphCreators;
 using Agent.Models;
+using Agent.Solutions;
 
 namespace Agent
 {
@@ -17,8 +19,9 @@ namespace Agent
     {
         public MainWindowViewModel()
         {
-            ActionFieldHeight = 3;
-            ActionFieldWidth = 3;
+            ActionFieldHeight = 4;
+            ActionFieldWidth = 4;
+            CookiesCount = 3;
         }
 
         private ActionField _actionField;
@@ -79,6 +82,24 @@ namespace Agent
                     ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth, CookiesCount);
                 }));
             }
+        }
+
+        private RelayCommand _startCommand;
+
+        public RelayCommand StartCommand
+        {
+            get { return _startCommand ?? (_startCommand = new RelayCommand(obj => { StartSolvationProcess(); })); }
+        }
+
+        private void StartSolvationProcess()
+        {
+            Task.Run(() =>
+            {
+                var solver = new BfsSolver();
+                var solution = solver.Solve(ActionField);
+                var agentPoint = solution.Last().Point;
+                ActionField.UpdateFieldNodeType(agentPoint, NodeType.Gross);
+            });
         }
 
         [NotifyPropertyChangedInvocator]

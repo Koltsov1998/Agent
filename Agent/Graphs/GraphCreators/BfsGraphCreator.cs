@@ -51,43 +51,36 @@ namespace Agent.Graphs.GraphCreators
             {
                 GraphNode currentNode = q.Dequeue();
                 currentNode.ChildNodes = new List<GraphNode>();
-                Point currentPoint = currentNode.Point;
 
                 // right
-                var rightPoint = new Point(currentPoint.X + 1, currentPoint.Y);
-                if (currentPoint.X + 1 < visited.GetLength(0) && !visited.Get(rightPoint) && field.FieldNodes.Get(rightPoint) != NodeType.Rock)
-                {
-                    var rightNode = new GraphNode(rightPoint, node, field.FieldNodes[currentPoint.X + 1, currentPoint.Y]);
-                    currentNode.ChildNodes.Add(rightNode);
-                    visited[currentPoint.X + 1, currentPoint.Y] = true;
-                    q.Enqueue(rightNode);
-                }
+                CheckNode(currentNode, 1, 0);
+
                 // up
-                var upPoint = new Point(currentPoint.X, currentPoint.Y - 1);
-                if (currentPoint.Y > 0 && !visited.Get(upPoint) && field.FieldNodes.Get(upPoint) != NodeType.Rock)
-                {
-                    var upNode = new GraphNode(upPoint, node, field.FieldNodes.Get(upPoint));
-                    currentNode.ChildNodes.Add(upNode);
-                    visited[currentPoint.X, currentPoint.Y - 1] = true;
-                    q.Enqueue(upNode);
-                }
+                CheckNode(currentNode, 0, -1);
+
                 // left
-                var leftPoint = new Point(currentPoint.X - 1, currentPoint.Y);
-                if (currentPoint.X > 0 && !visited.Get(leftPoint) && field.FieldNodes.Get(leftPoint) != NodeType.Rock)
-                {
-                    var rightNode = new GraphNode(leftPoint, node, field.FieldNodes.Get(leftPoint));
-                    currentNode.ChildNodes.Add(rightNode);
-                    visited[currentPoint.X - 1, currentPoint.Y] = true;
-                    q.Enqueue(rightNode);
-                }
+                CheckNode(currentNode, -1, 0);
+
                 // down
-                var downPoint = new Point(currentPoint.X, currentPoint.Y + 1);
-                if (currentPoint.Y + 1 < visited.GetLength(1) && !visited.Get(downPoint) && field.FieldNodes.Get(downPoint) != NodeType.Rock)
+                CheckNode(currentNode, 0, 1);
+            }
+
+            void CheckNode(GraphNode currNode, int dx, int dy)
+            {
+                if (dx * dy != 0)
                 {
-                    var downNode = new GraphNode(new Point(currentPoint.X, currentPoint.Y + 1), node, field.FieldNodes[currentPoint.X, currentPoint.Y + 1]);
-                    currentNode.ChildNodes.Add(downNode);
-                    visited[currentPoint.X, currentPoint.Y + 1] = true;
-                    q.Enqueue(downNode);
+                    throw new Exception("Route can't be diagonal'");
+                }
+
+                var newX = currNode.Point.X + dx;
+                var newY = currNode.Point.Y + dy;
+
+                if (newX >= 0 && newX < field.Width && newY >= 0 && newY < field.Height && !visited[newX, newY] && field.FieldNodes[newX, newY] != NodeType.Rock)
+                {
+                    var newNode = new GraphNode(new Point(newX, newY), currNode, field.FieldNodes[newX, newY]);
+                    currNode.ChildNodes.Add(newNode);
+                    visited[newX, newY] = true;
+                    q.Enqueue(newNode);
                 }
             }
         }

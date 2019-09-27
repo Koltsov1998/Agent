@@ -31,12 +31,13 @@
                     <Label>Печеньки:</Label>
                     <TextBox Width="40" VerticalAlignment="Center" Text="{Binding CookiesCount}"></TextBox>
                 </StackPanel>
+                <Button Width="96" Height="24" Command="{Binding GenerateCommand}">Generate</Button>
             </StackPanel>
-            <Button Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="96" Height="24" Command="{Binding GenerateCommand}">Сгенерировать</Button>
+            <Button Grid.Row="1" Width="96" Height="24" Command="{Binding StartCommand}">Start</Button>
         </Grid>
         <Grid Column="1" Background="#202020">
             <components:VisualField 
-                ActionField="{Binding Path=ActionField, UpdateSourceTrigger=PropertyChanged}">
+                ActionField="{Binding Path=ActionField}">
             </components:VisualField>
         </Grid>
     </Grid>

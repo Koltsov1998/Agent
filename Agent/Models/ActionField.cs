@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using Point = Agent.Others.Point;
 
 namespace Agent.Models
 {
-    public class ActionField
+    public class ActionField : DependencyObject
     {
         public ActionField(int height, int width, int cookiesCount)
         {
@@ -24,6 +20,14 @@ namespace Agent.Models
         public int Width { get; private set; }
 
         public NodeType[,] FieldNodes { get; private set; }
+
+        public event FieldNodesChanged FieldNodesChangedEvent;
+
+        public void UpdateFieldNodeType(Point point, NodeType newType)
+        {
+            FieldNodes[point.X, point.Y] = newType;
+            FieldNodesChangedEvent?.Invoke(this);
+        }
 
         private void InitializeFieldRandomly(int cookiesCount = 3)
         {
@@ -65,4 +69,6 @@ namespace Agent.Models
             }
         }
     }
+
+    public delegate void FieldNodesChanged(ActionField af);
 }
