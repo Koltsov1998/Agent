@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Agent.Algorythms;
 using Agent.Annotations;
+using Agent.Graphs;
 using Agent.Graphs.GraphCreators;
 using Agent.Models;
+using Agent.Others;
 using Agent.Solutions;
 
 namespace Agent
@@ -97,8 +99,24 @@ namespace Agent
             {
                 var solver = new BfsSolver();
                 var solution = solver.Solve(ActionField);
-                var agentPoint = solution.Last().Point;
-                ActionField.UpdateFieldNodeType(agentPoint, NodeType.Gross);
+                var stepsQueue = new Queue<GraphNode>();
+                for (int i = solution.Count - 1; i >= 0; i--)
+                {
+                    stepsQueue.Enqueue(solution[i]);
+                }
+
+                GraphNode previousStepNode = null;
+                while (stepsQueue.Count > 0)
+                {
+                    if (previousStepNode != null)
+                    {
+                        ActionField.UpdateFieldNodeType(previousStepNode.Point, previousStepNode.NodeType);
+                    }
+                    var nextNode = stepsQueue.Dequeue();
+                    ActionField.UpdateFieldNodeType(nextNode.Point, NodeType.Agent);
+                    previousStepNode = nextNode;
+                    Thread.Sleep(1000);
+                }
             });
         }
 

@@ -25,12 +25,7 @@ namespace Agent.Components
 
         public ActionField ActionField
         {
-            set
-            {
-                value.FieldNodesChangedEvent += OnActionFieldNodesChanged;
-                SetValue(ActionFieldProperty, value);
-                
-            }
+            set { SetValue(ActionFieldProperty, value); }
             get { return (ActionField) GetValue(ActionFieldProperty); }
         }
 
@@ -179,6 +174,7 @@ namespace Agent.Components
         private static void OnContextChanged(DependencyObject e, DependencyPropertyChangedEventArgs args)
         {
             var field = args.NewValue as ActionField;
+            field.FieldNodesChangedEvent += OnActionFieldNodesChanged;
             RerenderAll(field);
         }
 
@@ -206,11 +202,14 @@ namespace Agent.Components
 
         private static void RerenderAll(ActionField af)
         {
-            var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
-            RenderActionField(af, drawingContext);
-            RenderGraphMesh(CreateGraph(af), drawingContext);
-            RenderSolutionRoute(CreateSolutionRoute(af), drawingContext);
-            drawingContext.Close();
+            _drawingVisualElement.Dispatcher.Invoke(() =>
+            {
+                var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
+                RenderActionField(af, drawingContext);
+                RenderGraphMesh(CreateGraph(af), drawingContext);
+                RenderSolutionRoute(CreateSolutionRoute(af), drawingContext);
+                drawingContext.Close();
+            });
         }
 
         private static GraphNode CreateGraph(ActionField af)
