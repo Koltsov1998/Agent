@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Windows;
 using Point = Agent.Others.Point;
 
@@ -6,6 +7,50 @@ namespace Agent.Models
 {
     public class ActionField : DependencyObject
     {
+        public ActionField(string[] fieldPrototype)
+        {
+            Height = fieldPrototype.Length;
+            Width = fieldPrototype[1].Length;
+            FieldNodes = new NodeType[Height, Width];
+
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    var nodeLetter = fieldPrototype[i][j];
+                    var nodeType = NodeType.Gross;
+                    switch (nodeLetter)
+                    {
+                        case ' ':
+                            nodeType = NodeType.Gross;
+                            break;
+                        case 'A':
+                            nodeType = NodeType.Agent;
+                            break;
+                        case 'F':
+                            nodeType = NodeType.Star;
+                            break;
+                        case 'C':
+                            nodeType = NodeType.Cookie;
+                            break;
+                        case '#':
+                            nodeType = NodeType.Rock;
+                            break;
+                    }
+
+                    this.FieldNodes[i, j] = nodeType;
+                }
+            }
+        }
+
+
+        public ActionField(int height, int width)
+        {
+            Height = height;
+            Width = width;
+            FieldNodes = new NodeType[height, width];
+        }
+
         public ActionField(int height, int width, int cookiesCount)
         {
             Height = height;
@@ -68,7 +113,48 @@ namespace Agent.Models
                 PutObjectsOnSomeNodes(objectType, objectsLeft);
             }
         }
+
+        public override string ToString()
+        {
+            var result = new StringBuilder();
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    var node = FieldNodes[i, j];
+
+                    char nodeLetter = ' ';
+                    switch (node)
+                    {
+                        case NodeType.Agent:
+                            nodeLetter = 'A';
+                            break;
+                        case NodeType.Cookie:
+                            nodeLetter = 'C';
+                            break;
+                        case NodeType.Star:
+                            nodeLetter = 'F';
+                            break;
+                        case NodeType.Rock:
+                            nodeLetter = '#';
+                            break;
+                        case NodeType.Gross:
+                            nodeLetter = ' ';
+                            break;
+                    }
+
+                    result.Append(nodeLetter);
+                }
+
+                result.Append("\n");
+            }
+
+            return result.ToString();
+        }
+
+        public string StringRepresentation => this.ToString();
     }
+
 
     public delegate void FieldNodesChanged(ActionField af);
 }

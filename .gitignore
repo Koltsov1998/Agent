@@ -2,3 +2,6 @@
 Agent/obj
 .vs/Agent/v16
 .vs/Agent/v15
+packages
+Tests/bin
+Tests/obj

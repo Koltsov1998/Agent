@@ -15,23 +15,47 @@ namespace Agent.Solutions
     {
         private readonly BfsGraphCreator _graphCreator = new BfsGraphCreator();
 
-        public List<GraphNode> Solve(ActionField actionField)
+        public Route Solve(ActionField actionField)
         {
             Point agentPoint = new Point(1, 1);
+            int cookiesCount = 0;
             for (int i = 0; i < actionField.Width; i++)
+            {
                 for (int j = 0; j < actionField.Height; j++)
                 {
-                    if (actionField.FieldNodes[i, j] == NodeType.Agent)
+                    switch (actionField.FieldNodes[i, j])
                     {
-                        agentPoint = new Point(i, j);
+                        case NodeType.Agent:
+                        {
+                            agentPoint = new Point(i, j);
+                            break;
+                        }
+                        case NodeType.Cookie:
+                        {
+                            cookiesCount++;
+                            break;
+                        }
                     }
                 }
-
+            }
             var graph = _graphCreator.GenerateGraph(actionField, agentPoint);
-            return FindWayToObject(graph, NodeType.Cookie);
+            var result = new Route();
+            result.AppendNode(agentPoint);
+
+            for (int i = 0; i < cookiesCount; i++)
+            {
+                var routeToCookie = FindWayToObject(graph, NodeType.Cookie);
+                result = Route.ConcatRoutes(result, routeToCookie);
+                graph = _graphCreator.GenerateGraph(actionField, result.LastPoint);
+            }
+
+            var routeToStar = FindWayToObject(graph, NodeType.Star);
+            result = Route.ConcatRoutes(result, routeToStar);
+
+            return result;
         }
 
-        private List<GraphNode> FindWayToObject(GraphNode startNode, NodeType objectType)
+        private Route FindWayToObject(GraphNode startNode, NodeType objectType)
         {
             var visited = new HashSet<GraphNode>();
             if (startNode.ChildNodes == null || startNode.ChildNodes.Count == 0)
@@ -70,17 +94,25 @@ namespace Agent.Solutions
             throw new Exception("Object not found");
         }
 
-        private List<GraphNode> GetBackRoute(GraphNode foundObject, GraphNode startObject)
+        private Route GetBackRoute(GraphNode foundObject, GraphNode startObject)
         {
             var currentNode = foundObject;
-            var result = new List<GraphNode>();
+            var queue = new Stack<Point>();
 
             while (currentNode != startObject)
             {
-                result.Add(currentNode);
+                queue.Push(currentNode.Point);
                 currentNode = currentNode.ParentNode;
             }
-            result.Add(startObject);
+            queue.Push(startObject.Point);
+
+            var result = new Route();
+
+            while (queue.Count > 0)
+            {
+                result.AppendNode(queue.Pop());
+            }
+
             return result;
         }
     }

@@ -70,7 +70,7 @@ namespace Agent.Components
                 var backGroundRectangle = new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
                     _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth);
 
-                switch (field.FieldNodes[i, j])
+                switch (field.FieldNodes[j, i])
                 {
                     case NodeType.Gross:
                     {
@@ -206,25 +206,8 @@ namespace Agent.Components
             {
                 var drawingContext = _drawingVisualElement.drawingVisual.RenderOpen();
                 RenderActionField(af, drawingContext);
-                RenderGraphMesh(CreateGraph(af), drawingContext);
-                RenderSolutionRoute(CreateSolutionRoute(af), drawingContext);
                 drawingContext.Close();
             });
-        }
-
-        private static GraphNode CreateGraph(ActionField af)
-        {
-            //var graphCreator = new DfsGraphCreator();
-            var graphCreator = new BfsGraphCreator();
-            var graph = graphCreator.GenerateGraph(af);
-            return graph;
-
-        }
-
-        private static List<GraphNode> CreateSolutionRoute(ActionField af)
-        {
-            BfsSolver solver = new BfsSolver();
-            return solver.Solve(af);
         }
 
         private static void OnActionFieldNodesChanged(ActionField af)

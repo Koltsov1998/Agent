@@ -73,15 +73,40 @@ namespace Agent
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private RelayCommand generateCommand;
+        private RelayCommand generateRandomCommand;
 
-        public RelayCommand GenerateCommand
+        public RelayCommand GenerateRandomCommand
         {
             get
             {
-                return generateCommand ?? (generateCommand = new RelayCommand(obj =>
+                return generateRandomCommand ?? (generateRandomCommand = new RelayCommand(obj =>
                 {
                     ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth, CookiesCount);
+                }));
+            }
+        }
+
+        private RelayCommand generateTestCommand;
+
+        public RelayCommand GenerateTestCommand
+        {
+            get
+            {
+                string[] fieldPrototype = new[]
+                {
+                    //"F# C",
+                    //"    ",
+                    //"A #C",
+                    //" C##",
+                    "    ",
+                    "  C#",
+                    "  C ",
+                    "CFA ",
+                };
+                
+                return generateTestCommand ?? (generateTestCommand = new RelayCommand(obj =>
+                {
+                    ActionField = new ActionField(fieldPrototype);
                 }));
             }
         }
@@ -99,22 +124,18 @@ namespace Agent
             {
                 var solver = new BfsSolver();
                 var solution = solver.Solve(ActionField);
-                var stepsQueue = new Queue<GraphNode>();
-                for (int i = solution.Count - 1; i >= 0; i--)
-                {
-                    stepsQueue.Enqueue(solution[i]);
-                }
 
-                GraphNode previousStepNode = null;
-                while (stepsQueue.Count > 0)
+                Point previousPoint = null;
+                foreach (var point in solution.Points)
                 {
-                    if (previousStepNode != null)
+                    if (previousPoint != null)
                     {
-                        ActionField.UpdateFieldNodeType(previousStepNode.Point, previousStepNode.NodeType);
+                        ActionField.UpdateFieldNodeType(previousPoint, NodeType.Gross);
                     }
-                    var nextNode = stepsQueue.Dequeue();
-                    ActionField.UpdateFieldNodeType(nextNode.Point, NodeType.Agent);
-                    previousStepNode = nextNode;
+
+                    ActionField.UpdateFieldNodeType(point, NodeType.Agent);
+                    previousPoint = point;
+
                     Thread.Sleep(1000);
                 }
             });

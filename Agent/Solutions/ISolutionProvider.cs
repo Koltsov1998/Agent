@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Agent.Graphs;
 using Agent.Models;
+using Agent.Others;
 
 namespace Agent.Solutions
 {
     public interface ISolutionProvider
     {
-        List<GraphNode> Solve(ActionField actionField);
+        Route Solve(ActionField actionField);
     }
 }
