@@ -3,47 +3,48 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Agent.Models;
 
 namespace Agent.Others
 {
     public class Route
     {
-        public List<Point> Points { private set; get; }
+        public List<Node> Nodes { private set; get; }
 
         public Route()
         {
-            Points = new List<Point>();
+            Nodes = new List<Node>();
         }
 
-        private Route(List<Point> points)
+        private Route(List<Node> nodes)
         {
-            Points = points;
+            Nodes = nodes;
         }
 
-        public static Route FromPointsList(List<Point> _pointList)
+        public static Route FromNodesList(List<Node> _pointList)
         {
             return new Route(_pointList);
         }
 
-        public void AppendNode(Point newPoint)
+        public void AppendNode(Node newNode)
         {
-            if (Points.Count > 0 && !newPoint.Near(Points.Last()))
+            if (Nodes.Count > 0 && !newNode.Point.Near(Nodes.Last().Point))
             {
-                throw new Exception($"Point #{newPoint} cannot be appended");
+                throw new Exception($"Point #{newNode} cannot be appended");
             }
 
-            Points.Add(newPoint);
+            Nodes.Add(newNode);
         }
 
         public static Route ConcatRoutes(Route route1, Route route2)
         {
-            List<Point> newRoutePoints = route1.Points;
-            if (route1.Points.Count > 0 && !route1.Points.Last().Equals(route2.Points.First()))
+            List<Node> newRoutePoints = route1.Nodes;
+            if (route1.Nodes.Count > 0 && !route1.Nodes.Last().Equals(route2.Nodes.First()))
             {
-                throw new Exception($"Routes can't be concatenated.\nRoute 1 lasts at {route1.Points.Last()}\nRoute 2 starts at {route2.Points.First()}");
+                throw new Exception($"Routes can't be concatenated.\nRoute 1 lasts at {route1.Nodes.Last()}\nRoute 2 starts at {route2.Nodes.First()}");
             }
 
-            var route2Points = route2.Points;
+            var route2Points = route2.Nodes;
             route2Points.RemoveAt(0);
             newRoutePoints.AddRange(route2Points);
 
@@ -54,14 +55,14 @@ namespace Agent.Others
         {
             var other = obj as Route;
 
-            if (other.Points.Count != this.Points.Count)
+            if (other.Nodes.Count != this.Nodes.Count)
             {
                 return false;
             }
 
-            for (int i = 0; i < this.Points.Count; i++)
+            for (int i = 0; i < this.Nodes.Count; i++)
             {
-                if (!Points[i].Equals(other.Points[i]))
+                if (!Nodes[i].Equals(other.Nodes[i]))
                 {
                     return false;
                 }
@@ -70,6 +71,6 @@ namespace Agent.Others
             return true;
         }
 
-        public Point LastPoint => Points.Last();
+        public Node LastNode => Nodes.Last();
     }
 }

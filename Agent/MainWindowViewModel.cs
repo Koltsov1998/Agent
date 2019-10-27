@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -71,6 +72,30 @@ namespace Agent
             get { return _cookiesCount; }
         }
 
+        private bool _generationEnabled = true;
+
+        public bool GenerationEnabled
+        {
+            set
+            {
+                _generationEnabled = value;
+                OnPropertyChanged();
+            }
+            get { return _generationEnabled; }
+        }
+
+        private bool _startEnabled = false;
+
+        public bool StartEnabled
+        {
+            set
+            {
+                _startEnabled = value;
+                OnPropertyChanged();
+            }
+            get { return _startEnabled; }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private RelayCommand generateRandomCommand;
@@ -81,8 +106,10 @@ namespace Agent
             {
                 return generateRandomCommand ?? (generateRandomCommand = new RelayCommand(obj =>
                 {
+                    StartEnabled = true;
                     ActionField = new ActionField(ActionFieldHeight, ActionFieldWidth, CookiesCount);
                 }));
+                
             }
         }
 
@@ -92,20 +119,24 @@ namespace Agent
         {
             get
             {
-                string[] fieldPrototype = new[]
-                {
-                    //"F# C",
-                    //"    ",
-                    //"A #C",
-                    //" C##",
-                    "    ",
-                    "  C#",
-                    "  C ",
-                    "CFA ",
-                };
                 
+
                 return generateTestCommand ?? (generateTestCommand = new RelayCommand(obj =>
                 {
+                    StartEnabled = true;
+
+                    string[] fieldPrototype = new[]
+                    {
+                        //"F# C",
+                        //"    ",
+                        //"A #C",
+                        //" C##",
+                        "    ",
+                        "  C#",
+                        "  C ",
+                        "CFA ",
+                    };
+
                     ActionField = new ActionField(fieldPrototype);
                 }));
             }
@@ -115,7 +146,12 @@ namespace Agent
 
         public RelayCommand StartCommand
         {
-            get { return _startCommand ?? (_startCommand = new RelayCommand(obj => { StartSolvationProcess(); })); }
+            get { return _startCommand ?? (_startCommand = new RelayCommand(obj =>
+            {
+                GenerationEnabled = false;
+                // StartSolvationProcess(); 
+                Animate();
+            })); }
         }
 
         private void StartSolvationProcess()
@@ -126,19 +162,63 @@ namespace Agent
                 var solution = solver.Solve(ActionField);
 
                 Point previousPoint = null;
-                foreach (var point in solution.Points)
-                {
-                    if (previousPoint != null)
-                    {
-                        ActionField.UpdateFieldNodeType(previousPoint, NodeType.Gross);
-                    }
+                NodeType previousNodeType = NodeType.Agent;
+                //foreach (var node in solution.Route.Nodes)
+                //{
+                //    if (previousPoint != null)
+                //    {
+                //        ActionField.UpdateFieldNodeType(previousPoint, previousNodeType);
+                //    }
+                //    previousNodeType = ActionField.Nodes.GetNode(point).NodeType; 
+                //    previousPoint = point;
 
-                    ActionField.UpdateFieldNodeType(point, NodeType.Agent);
-                    previousPoint = point;
+                //    ActionField.UpdateFieldNodeType(point, NodeType.Agent);
 
-                    Thread.Sleep(1000);
-                }
+                //    Thread.Sleep(1000);
+                //}
             });
+        }
+
+        private void Animate()
+        {
+            Task.Run(() =>
+            {
+                
+                for (int i = 0; i < CookiesCount; i++)
+                {
+                    GotoObject(NodeType.Cookie);
+                }
+
+                GotoObject(NodeType.Star);
+            });
+        }
+
+        private void GotoObject(NodeType nodeType)
+        {
+            var solver = new BfsSolver();
+
+            
+            var solution = solver.FindWay(ActionField, nodeType);
+
+            Node reservedNode = ActionField.Nodes.Single(n => n.NodeType == NodeType.Agent);
+            reservedNode.NodeType = NodeType.Gross;
+            Node reservedNode2 = null; 
+            foreach (var node in solution.Route.Nodes)
+            {
+                ActionField.UpdateFieldNodeType(node.Point, NodeType.Agent);
+                if(reservedNode2 != null)
+                {
+                    ActionField.UpdateFieldNodeType(reservedNode2.Point, reservedNode2.NodeType);
+                }
+                else
+                {
+                    ActionField.UpdateFieldNodeType(reservedNode.Point, NodeType.Gross);
+
+                }
+                reservedNode = node;
+                reservedNode2 = reservedNode;
+                Thread.Sleep(1000);
+            }
         }
 
         [NotifyPropertyChangedInvocator]

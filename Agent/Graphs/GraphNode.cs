@@ -14,15 +14,12 @@ namespace Agent.Graphs
 
         public List<GraphNode> ChildNodes { get; set; }
 
-        public Point Point { private set; get; }
+        public Node Node { private set; get; }
 
-        public NodeType NodeType { get; }
-
-        public GraphNode(Point point, GraphNode parentNode, NodeType nodeType)
+        public GraphNode(Node node, GraphNode parentNode)
         {
-            Point = point;
+            Node = node;
             ParentNode = parentNode;
-            NodeType = nodeType;
         }
     }
 }

@@ -64,25 +64,27 @@ namespace Agent.Components
             drawingContext.DrawRectangle(Brushes.Black, (Pen) null,
                 new Rect(0, 0, fieldWidth, fieldHeight));
 
-            for (int i = 0; i < field.Height; i++)
-            for (int j = 0; j < field.Width; j++)
+            foreach (var fieldNode in field.Nodes)
             {
-                var backGroundRectangle = new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth),
-                    _bordersWidth + j * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth);
+                var x = fieldNode.Point.X;
+                var y = fieldNode.Point.Y;
 
-                switch (field.FieldNodes[j, i])
+                var backGroundRectangle = new Rect(_bordersWidth + x * (_bordersWidth + _nodeWidth),
+                    _bordersWidth + y * (_bordersWidth + _nodeWidth), _nodeWidth, _nodeWidth);
+
+                switch (fieldNode.NodeType)
                 {
                     case NodeType.Gross:
                     {
                         drawingContext.DrawRectangle(Brushes.ForestGreen,
-                            (Pen) null,
+                            (Pen)null,
                             backGroundRectangle);
                     }
                         break;
                     case NodeType.Rock:
                     {
                         drawingContext.DrawRectangle(Brushes.DarkSlateGray,
-                            (Pen) null,
+                            (Pen)null,
                             backGroundRectangle
                         );
                     }
@@ -90,24 +92,24 @@ namespace Agent.Components
                     case NodeType.Star:
                     {
                         drawingContext.DrawRectangle(Brushes.ForestGreen,
-                            (Pen) null,
+                            (Pen)null,
                             backGroundRectangle);
                         drawingContext.DrawImage(_starImage,
-                            new Rect(_bordersWidth + i * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
-                                _bordersWidth + j * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
+                            new Rect(_bordersWidth + x * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
+                                _bordersWidth + y * (_bordersWidth + _nodeWidth) + (_nodeWidth - _objectSize) / 2,
                                 _objectSize, _objectSize));
                         break;
                     }
 
                     case NodeType.Cookie:
                     {
-                        DrawObject(_cookieImage, drawingContext, i, j);
+                        DrawObject(_cookieImage, drawingContext, x, y);
                         break;
                     }
 
                     case NodeType.Agent:
                     {
-                        DrawObject(_heroImage, drawingContext, i, j);
+                        DrawObject(_heroImage, drawingContext, x, y);
                         break;
                     }
                 }
@@ -128,13 +130,13 @@ namespace Agent.Components
 
         private static void RenderGraphMesh(GraphNode graph, DrawingContext drawingContext)
         {
-            IterateOnGraph(graph, (context, point, arg3) => DrawArrow(context, point, arg3, Brushes.Red));
+            IterateOnGraph(graph, (context, node, node2) => DrawArrow(context, node.Point, node2.Point, Brushes.Red));
 
-            void IterateOnGraph(GraphNode g, Action<DrawingContext, Point, Point> callback)
+            void IterateOnGraph(GraphNode g, Action<DrawingContext, Node, Node> callback)
             {
                 foreach (var childNode in g.ChildNodes)
                 {
-                    callback(drawingContext, g.Point, childNode.Point);
+                    callback(drawingContext, g.Node, childNode.Node);
                     IterateOnGraph(childNode, callback);
                 }
             }
@@ -145,7 +147,7 @@ namespace Agent.Components
             var previousNode = solutionRoute[0];
             for (int i = 1; i < solutionRoute.Count; i++)
             {
-                DrawArrow(drawindContext, previousNode.Point, solutionRoute[i].Point, Brushes.Purple);
+                DrawArrow(drawindContext, previousNode.Node.Point, solutionRoute[i].Node.Point, Brushes.Purple);
                 previousNode = solutionRoute[i];
             }
         }

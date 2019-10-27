@@ -80,10 +80,13 @@
     </Compile>
     <Compile Include="Graphs\GraphCreators\BfsGraphCreator.cs" />
     <Compile Include="Graphs\GraphNode.cs" />
+    <Compile Include="Models\Exceprions\NotEnouphNodesException.cs" />
+    <Compile Include="Models\FieldNodes.cs" />
     <Compile Include="Others\Point.cs" />
     <Compile Include="Others\Route.cs" />
     <Compile Include="Solutions\BfsSolver.cs" />
     <Compile Include="Solutions\ISolutionProvider.cs" />
+    <Compile Include="Solutions\Solution.cs" />
     <Compile Include="UI\Components\VisualField\DrawingVisualElement.cs" />
     <Compile Include="UI\Components\VisualField\VisualField.xaml.cs">
       <DependentUpon>VisualField.xaml</DependentUpon>

@@ -8,6 +8,7 @@ using Agent.Graphs;
 using Agent.Graphs.GraphCreators;
 using Agent.Models;
 using Agent.Others;
+using NUnit.Framework.Constraints;
 
 namespace Agent.Solutions
 {
@@ -15,44 +16,43 @@ namespace Agent.Solutions
     {
         private readonly BfsGraphCreator _graphCreator = new BfsGraphCreator();
 
-        public Route Solve(ActionField actionField)
+        public Solution Solve(ActionField actionField)
         {
-            Point agentPoint = new Point(1, 1);
-            int cookiesCount = 0;
-            for (int i = 0; i < actionField.Width; i++)
-            {
-                for (int j = 0; j < actionField.Height; j++)
-                {
-                    switch (actionField.FieldNodes[i, j])
-                    {
-                        case NodeType.Agent:
-                        {
-                            agentPoint = new Point(i, j);
-                            break;
-                        }
-                        case NodeType.Cookie:
-                        {
-                            cookiesCount++;
-                            break;
-                        }
-                    }
-                }
-            }
-            var graph = _graphCreator.GenerateGraph(actionField, agentPoint);
-            var result = new Route();
-            result.AppendNode(agentPoint);
+            Node agentNode = actionField.Nodes.Single(n => n.NodeType == NodeType.Agent);
+            int cookiesCount = actionField.Nodes.Count(n => n.NodeType == NodeType.Cookie);
+            
+            var graph = _graphCreator.GenerateGraph(actionField, agentNode.Point);
+            var route = new Route();
+            route.AppendNode(agentNode);
 
             for (int i = 0; i < cookiesCount; i++)
             {
                 var routeToCookie = FindWayToObject(graph, NodeType.Cookie);
-                result = Route.ConcatRoutes(result, routeToCookie);
-                graph = _graphCreator.GenerateGraph(actionField, result.LastPoint);
+                route = Route.ConcatRoutes(route, routeToCookie);
+                graph = _graphCreator.GenerateGraph(actionField, route.LastNode.Point);
             }
 
             var routeToStar = FindWayToObject(graph, NodeType.Star);
-            result = Route.ConcatRoutes(result, routeToStar);
+            route = Route.ConcatRoutes(route, routeToStar);
 
-            return result;
+            return new Solution
+            {
+                Route = route,
+                Graph = graph,
+            };
+        }
+
+        public Solution FindWay(ActionField actionField, NodeType objectType)
+        {
+            Node agentNode = actionField.Nodes.Single(n => n.NodeType == NodeType.Agent);
+
+            var graph = _graphCreator.GenerateGraph(actionField, agentNode.Point);
+            var routeToObject = FindWayToObject(graph, objectType);
+            return new Solution
+            {
+                Route = routeToObject,
+                Graph = graph
+            };
         }
 
         private Route FindWayToObject(GraphNode startNode, NodeType objectType)
@@ -80,7 +80,7 @@ namespace Agent.Solutions
 
                 foreach (var currentNodeChildNode in currentNode.ChildNodes)
                 {
-                    if(currentNodeChildNode.NodeType != objectType)
+                    if(currentNodeChildNode.Node.NodeType != objectType)
                     {
                         q.Enqueue(currentNodeChildNode);
                     }
@@ -97,14 +97,14 @@ namespace Agent.Solutions
         private Route GetBackRoute(GraphNode foundObject, GraphNode startObject)
         {
             var currentNode = foundObject;
-            var queue = new Stack<Point>();
+            var queue = new Stack<Node>();
 
             while (currentNode != startObject)
             {
-                queue.Push(currentNode.Point);
+                queue.Push(currentNode.Node);
                 currentNode = currentNode.ParentNode;
             }
-            queue.Push(startObject.Point);
+            queue.Push(startObject.Node);
 
             var result = new Route();
 
