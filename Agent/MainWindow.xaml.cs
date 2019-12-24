@@ -15,8 +15,6 @@ using System.Windows.Shapes;
 
 namespace Agent
 {
-   
-
     public partial class MainWindow : Window
     {
         public MainWindow()

@@ -5,3 +5,6 @@ Agent/obj
 packages
 Tests/bin
 Tests/obj
+Crosses/bin
+Crosses/obj
+.vs/Agent/DesignTimeBuild
