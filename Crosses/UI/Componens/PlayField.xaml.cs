@@ -20,11 +20,12 @@ namespace Crosses.UI.Componens
     public partial class PlayField : UserControl
     {
         private readonly Size _size;
+        private readonly Game _game;
         private readonly BitmapImage _crossImage;
         private readonly BitmapImage _cross2Image;
         private readonly BitmapImage _zeroImage;
 
-        public PlayField(Size size)
+        public PlayField(Game game)
         {
             InitializeComponent();
 
@@ -37,30 +38,28 @@ namespace Crosses.UI.Componens
             var zeroImageUri = new Uri("pack://application:,,/UI/Images/zero.png");
             _zeroImage = new BitmapImage(zeroImageUri);
 
-            _size = size;
+            _size = game.FieldSize;
+            _game = game;
             field.Dispatcher.InvokeAsync(() =>
             {
-                for (int i = 0; i < size.Height; i++)
+                for (int i = 0; i < _size.Height; i++)
                 {
                     field.ColumnDefinitions.Add(new ColumnDefinition());
                 }
 
-                for (int j = 0; j < size.Width; j++)
+                for (int j = 0; j < _size.Width; j++)
                 {
                     field.RowDefinitions.Add(new RowDefinition());
                 }
 
-                for (int i = 0; i < size.Height; i++)
+                for (int i = 0; i < _size.Height; i++)
                 {
-                    for (int j = 0; j < size.Width; j++)
+                    for (int j = 0; j < _size.Width; j++)
                     {
                         var button = new Button();
                         button.SetValue(Grid.ColumnProperty, i);
                         button.SetValue(Grid.RowProperty, j);
-                        button.Content = new Image()
-                        {
-                            Source = _cross2Image
-                        };
+                        
                         button.Click += OnButtonClick;
                         button.Name = $"Button_{i}_{j}";
                         field.Children.Add(button);
@@ -71,7 +70,29 @@ namespace Crosses.UI.Componens
 
         private void OnButtonClick(object sender, RoutedEventArgs args)
         {
+            var button = sender as Button;
+            var coordinate = new Coordinate(int.Parse(button.Name.Split("_")[1]), int.Parse(button.Name.Split("_")[2]));
+            _game.MakeTurn(coordinate);
+            button.Content = new Image()
+            {
+                Source = _cross2Image
+            };
 
+            var enemyTurnCoordinate = _game.WaitForEnemyTurn();
+            foreach (var b in field.Children)
+            {
+                var but = b as Button;
+                if (but != null)
+                {
+                    if (but.Name == $"Button_{enemyTurnCoordinate.X}_{enemyTurnCoordinate.Y}")
+                    {
+                        but.Content = new Image()
+                        {
+                            Source = _zeroImage
+                        };
+                    }
+                }
+            }
         }
     }
 }

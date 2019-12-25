@@ -30,7 +30,8 @@ namespace Crosses
         {
             FieldContainer.Dispatcher.Invoke(() =>
             {
-                FieldContainer.Children.Add(new PlayField(new Size(int.Parse(HeightTextBox.Text), int.Parse(WidthTextBox.Text))));
+                var size = new Size(int.Parse(HeightTextBox.Text), int.Parse(WidthTextBox.Text));
+                FieldContainer.Children.Add(new PlayField(new Game(size)));
                 StartButton.IsEnabled = false;
             });
         }
