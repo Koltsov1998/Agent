@@ -199,24 +199,21 @@ namespace Agent
 
             
             var solution = solver.FindWay(ActionField, nodeType);
-
-            Node reservedNode = ActionField.Nodes.Single(n => n.NodeType == NodeType.Agent);
+            Node reservedNode = solution.Route.Nodes.First().Copy();
             reservedNode.NodeType = NodeType.Gross;
-            Node reservedNode2 = null; 
+
             foreach (var node in solution.Route.Nodes)
             {
-                ActionField.UpdateFieldNodeType(node.Point, NodeType.Agent);
-                if(reservedNode2 != null)
+                if (reservedNode != null)
                 {
-                    ActionField.UpdateFieldNodeType(reservedNode2.Point, reservedNode2.NodeType);
-                }
-                else
-                {
-                    ActionField.UpdateFieldNodeType(reservedNode.Point, NodeType.Gross);
+                    ActionField.UpdateFieldNodeType(reservedNode.Point, reservedNode.NodeType);
 
                 }
-                reservedNode = node;
-                reservedNode2 = reservedNode;
+
+                reservedNode = node.Copy();
+                
+                ActionField.UpdateFieldNodeType(node.Point, NodeType.Agent);
+
                 Thread.Sleep(1000);
             }
         }

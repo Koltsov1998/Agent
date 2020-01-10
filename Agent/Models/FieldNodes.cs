@@ -109,6 +109,14 @@ namespace Agent.Models
         {
             Point = new Point(x, y);
         }
+
+        public Node Copy()
+        {
+            return new Node(this.Point.X, this.Point.Y)
+            {
+                NodeType = this.NodeType
+            };
+        }
     }
 
 }
